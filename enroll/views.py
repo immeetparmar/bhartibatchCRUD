@@ -5,17 +5,17 @@ from .forms import Productform
 
 def home(request):
     if request.method == "POST":
-       form = Productform(request.POST)
+       form = Productform(request.POST, request.FILES)
        if form.is_valid():
            nm = form.cleaned_data["name"]
            dc = form.cleaned_data["desc"]
            pr = form.cleaned_data["price"]
-           reg = Product(name=nm, desc=dc, price=pr)
+           img = form.cleaned_data.get("image")
+           reg = Product(name=nm, desc=dc, price=pr, image=img)
            reg.save()
            form = Productform()
     else:
         form = Productform()
-
     prod = Product.objects.all()
     stud = Student.objects.all()
     return render(request, "enroll/home.html", {"prod":prod, "form":form, "stud":stud})
