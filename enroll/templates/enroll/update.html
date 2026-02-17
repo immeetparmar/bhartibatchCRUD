@@ -1,403 +1,379 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "enroll/base.html" %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modify Treasure - The Iron Inventory</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=MedievalSharp&family=Uncial+Antiqua&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+{% block title %}Modify Treasure - The Iron Inventory{% endblock %}
+
+{% block styles %}
+<style>
+    .container {
+        max-width: 700px;
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        animation: fadeInUp 0.8s ease;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
         }
 
-        body {
-            font-family: 'Cinzel', serif;
-            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow-x: hidden;
-            color: #d4af37;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Form Container - Parchment Style */
+    .form-container {
+        background: var(--bg-card);
+        border: 3px solid var(--border-color);
+        border-radius: 8px;
+        padding: 50px 40px;
+        box-shadow: 0 0 40px var(--shadow-color);
+        position: relative;
+    }
+
+    .form-container::before {
+        content: '⚔️';
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 2.5rem;
+        background: var(--bg-card);
+        padding: 0 20px;
+    }
+
+    .form-container::after {
+        content: '◆';
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        opacity: 0.3;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 40px;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 20px;
+    }
+
+    .form-header h1 {
+        font-family: 'Uncial Antiqua', cursive;
+        color: var(--text-primary);
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        text-shadow: 0 0 10px var(--shadow-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .form-header h1 i {
+        font-size: 2rem;
+        color: #ff4500;
+        animation: glow 2s ease-in-out infinite;
+    }
+
+    [data-theme="summer"] .form-header h1 i {
+        color: #dc143c;
+    }
+
+    @keyframes glow {
+
+        0%,
+        100% {
+            text-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
         }
 
-        /* Animated background effects */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image:
-                radial-gradient(circle at 10% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 90% 80%, rgba(255, 69, 0, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(70, 130, 180, 0.03) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-            animation: shimmer 10s ease-in-out infinite;
+        50% {
+            text-shadow: 0 0 20px rgba(255, 69, 0, 0.8);
         }
+    }
 
-        @keyframes shimmer {
+    .form-header p {
+        font-family: 'MedievalSharp', cursive;
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+    }
 
-            0%,
-            100% {
-                opacity: 0.3;
-            }
+    /* Current Image Display */
+    .current-image {
+        margin-bottom: 25px;
+        text-align: center;
+    }
 
-            50% {
-                opacity: 0.6;
-            }
-        }
+    .current-image label {
+        display: block;
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-        /* Falling snow effect */
-        body::after {
-            content: '';
-            position: fixed;
-            top: -50%;
-            left: 0;
-            width: 100%;
-            height: 150%;
-            background-image:
-                radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.3), transparent),
-                radial-gradient(2px 2px at 60% 70%, rgba(255, 255, 255, 0.2), transparent),
-                radial-gradient(1px 1px at 50% 50%, rgba(255, 255, 255, 0.3), transparent),
-                radial-gradient(1px 1px at 80% 10%, rgba(255, 255, 255, 0.2), transparent);
-            background-size: 200px 200px, 300px 300px, 150px 150px, 250px 250px;
-            animation: snowfall 20s linear infinite;
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.4;
-        }
+    .current-image img {
+        max-width: 100%;
+        max-height: 300px;
+        border: 3px solid var(--border-secondary);
+        border-radius: 8px;
+        object-fit: cover;
+    }
 
-        @keyframes snowfall {
-            0% {
-                transform: translateY(0);
-            }
+    form p {
+        margin-bottom: 25px;
+    }
 
-            100% {
-                transform: translateY(50%);
-            }
-        }
+    label {
+        display: block;
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-        .container {
-            max-width: 700px;
-            width: 100%;
-            position: relative;
-            z-index: 2;
-            animation: fadeInUp 0.8s ease;
-        }
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    input[type="file"] {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid var(--border-secondary);
+        border-radius: 4px;
+        background: var(--input-bg);
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-family: 'Cinzel', serif;
+        transition: all 0.3s ease;
+    }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.6;
+    }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    input:focus,
+    textarea:focus {
+        outline: none;
+        border-color: var(--border-color);
+        box-shadow: 0 0 15px var(--shadow-color);
+    }
 
-        /* Form Container - Parchment Style */
+    textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Image Preview */
+    .image-preview-container {
+        margin: 15px 0;
+        display: none;
+    }
+
+    .image-preview-container.active {
+        display: block;
+    }
+
+    .image-preview {
+        width: 100%;
+        max-height: 250px;
+        border: 2px solid var(--border-secondary);
+        border-radius: 8px;
+        object-fit: cover;
+        margin-top: 10px;
+    }
+
+    .image-info {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 5px;
+        text-align: center;
+    }
+
+    /* Button Container */
+    .button-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 35px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 16px;
+        border: 2px solid;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+        font-family: 'Cinzel', serif;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #d4af37 0%, #aa8a2e 100%);
+        color: #1a1410;
+        border-color: var(--border-color);
+        box-shadow: 0 6px 20px var(--shadow-color);
+    }
+
+    .btn-save::before {
+        content: '✨';
+        position: absolute;
+        left: -30px;
+        transition: left 0.3s ease;
+    }
+
+    .btn-save:hover::before {
+        left: 10px;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px var(--shadow-color);
+        background: linear-gradient(135deg, #f0c040 0%, #d4af37 100%);
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #4682b4 0%, #1e3a5f 100%);
+        color: #ffffff;
+        border-color: #4682b4;
+        box-shadow: 0 4px 15px rgba(70, 130, 180, 0.4);
+    }
+
+    .btn-back::before {
+        content: '❄️';
+        position: absolute;
+        right: -30px;
+        transition: right 0.3s ease;
+    }
+
+    .btn-back:hover::before {
+        right: 10px;
+    }
+
+    .btn-back:hover {
+        background: linear-gradient(135deg, #5a9fd4 0%, #4682b4 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(70, 130, 180, 0.6);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
         .form-container {
-            background: linear-gradient(135deg, #2a2419 0%, #1a1410 100%);
-            border: 3px solid #d4af37;
-            border-radius: 8px;
-            padding: 50px 40px;
-            box-shadow:
-                0 0 40px rgba(212, 175, 55, 0.3),
-                inset 0 0 50px rgba(0, 0, 0, 0.5);
-            background-image:
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(212, 175, 55, 0.03) 2px, rgba(212, 175, 55, 0.03) 4px);
-            position: relative;
-        }
-
-        .form-container::before {
-            content: '⚔️';
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 2.5rem;
-            background: #1a1410;
-            padding: 0 20px;
-        }
-
-        .form-container::after {
-            content: '◆';
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            color: #d4af37;
-            font-size: 1.5rem;
-            opacity: 0.3;
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #d4af37;
-            padding-bottom: 20px;
+            padding: 40px 30px;
         }
 
         .form-header h1 {
-            font-family: 'Uncial Antiqua', cursive;
-            color: #d4af37;
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 10px;
-            text-shadow:
-                0 0 10px rgba(212, 175, 55, 0.5),
-                0 0 20px rgba(212, 175, 55, 0.3),
-                2px 2px 4px rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .form-header h1 i {
             font-size: 2rem;
-            color: #ff4500;
-            animation: glow 2s ease-in-out infinite;
         }
 
-        @keyframes glow {
-
-            0%,
-            100% {
-                text-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
-            }
-
-            50% {
-                text-shadow: 0 0 20px rgba(255, 69, 0, 0.8);
-            }
-        }
-
-        .form-header p {
-            font-family: 'MedievalSharp', cursive;
-            color: #8b7355;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
-        }
-
-        form p {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            color: #d4af37;
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        textarea,
-        input[type="file"] {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #5a4a3a;
-            border-radius: 4px;
-            background: rgba(42, 36, 25, 0.6);
-            color: #d4af37;
-            font-size: 1rem;
-            font-family: 'Cinzel', serif;
-            transition: all 0.3s ease;
-        }
-
-        input::placeholder,
-        textarea::placeholder {
-            color: rgba(212, 175, 55, 0.5);
-        }
-
-        input:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #d4af37;
-            background: rgba(42, 36, 25, 0.8);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        /* Button Container */
         .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 35px;
+            flex-direction: column;
         }
+    }
+</style>
+{% endblock %}
 
-        .btn {
-            flex: 1;
-            padding: 16px;
-            border: 2px solid;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            position: relative;
-            overflow: hidden;
-        }
+{% block content %}
+<div class="div-container">
+    <div class="form-container">
+        <div class="form-header">
+            <h1><i class="fas fa-scroll"></i> Modify Treasure</h1>
+            <p>⚜ Alter the details of this item ⚜</p>
+        </div>
 
-        .btn-save {
-            background: linear-gradient(135deg, #d4af37 0%, #aa8a2e 100%);
-            color: #1a1410;
-            border-color: #d4af37;
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
-        }
+        <!-- Display current image if exists -->
+        {% if product.image %}
+        <div class="current-image">
+            <label>Current Image</label>
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        </div>
+        {% endif %}
 
-        .btn-save::before {
-            content: '✨';
-            position: absolute;
-            left: -30px;
-            transition: left 0.3s ease;
-        }
+        <form action="" method="post" enctype="multipart/form-data" id="updateForm">
+            {% csrf_token %}
+            {{ form.as_p }}
 
-        .btn-save:hover::before {
-            left: 10px;
-        }
-
-        .btn-save:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.6);
-            background: linear-gradient(135deg, #f0c040 0%, #d4af37 100%);
-        }
-
-        .btn-back {
-            background: linear-gradient(135deg, #4682b4 0%, #1e3a5f 100%);
-            color: #ffffff;
-            border-color: #4682b4;
-            box-shadow: 0 4px 15px rgba(70, 130, 180, 0.4);
-        }
-
-        .btn-back::before {
-            content: '❄️';
-            position: absolute;
-            right: -30px;
-            transition: right 0.3s ease;
-        }
-
-        .btn-back:hover::before {
-            right: 10px;
-        }
-
-        .btn-back:hover {
-            background: linear-gradient(135deg, #5a9fd4 0%, #4682b4 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(70, 130, 180, 0.6);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        /* Decorative corner ornaments */
-        .ornament {
-            position: fixed;
-            color: #d4af37;
-            opacity: 0.15;
-            font-size: 3rem;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .ornament.top-left {
-            top: 20px;
-            left: 20px;
-        }
-
-        .ornament.top-right {
-            top: 20px;
-            right: 20px;
-        }
-
-        .ornament.bottom-left {
-            bottom: 20px;
-            left: 20px;
-        }
-
-        .ornament.bottom-right {
-            bottom: 20px;
-            right: 20px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .form-container {
-                padding: 40px 30px;
-            }
-
-            .form-header h1 {
-                font-size: 2rem;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <!-- Decorative corner ornaments -->
-    <div class="ornament top-left">🐉</div>
-    <div class="ornament top-right">🗡️</div>
-    <div class="ornament bottom-left">🏰</div>
-    <div class="ornament bottom-right">👑</div>
-
-    <div class="container">
-        <div class="form-container">
-            <div class="form-header">
-                <h1><i class="fas fa-scroll"></i> Modify Treasure</h1>
-                <p>⚜ Alter the details of this item ⚜</p>
+            <!-- Image Preview for new upload -->
+            <div class="image-preview-container" id="imagePreviewContainer">
+                <label>New Image Preview</label>
+                <img id="imagePreview" class="image-preview" alt="Image preview">
+                <div class="image-info" id="imageInfo"></div>
             </div>
 
-            <form action="" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-
-                <div class="button-group">
-                    <button type="submit" class="btn btn-save">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                    <a href="{% url 'home' %}" class="btn btn-back">
-                        <i class="fas fa-arrow-left"></i> Return
-                    </a>
-                </div>
-            </form>
-        </div>
+            <div class="button-group">
+                <button type="submit" class="btn btn-save">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a href="{% url 'home' %}" class="btn btn-back">
+                    <i class="fas fa-arrow-left"></i> Return
+                </a>
+            </div>
+        </form>
     </div>
+</div>
+{% endblock %}
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+{% block scripts %}
+<script>
+    // Image preview functionality
+    const fileInput = document.querySelector('input[type="file"]');
+    const imagePreview = document.getElementById('imagePreview');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imageInfo = document.getElementById('imageInfo');
 
-</body>
+    if (fileInput) {
+        fileInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
 
-</html>
+            if (file) {
+                // Check if file is an image
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                        imagePreviewContainer.classList.add('active');
+
+                        // Display file info
+                        const sizeInKB = (file.size / 1024).toFixed(2);
+                        imageInfo.textContent = `${file.name} (${sizeInKB} KB)`;
+                    };
+
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Please select an image file');
+                    fileInput.value = '';
+                }
+            } else {
+                imagePreviewContainer.classList.remove('active');
+            }
+        });
+    }
+</script>
+{% endblock %}
