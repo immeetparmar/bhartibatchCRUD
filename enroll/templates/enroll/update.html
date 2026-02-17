@@ -1,82 +1,379 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Student Information</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
+{% extends "enroll/base.html" %}
+{% load static %}
+
+{% block title %}Modify Treasure - The Iron Inventory{% endblock %}
+
+{% block styles %}
+<style>
+    .container {
+        max-width: 700px;
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        animation: fadeInUp 0.8s ease;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
         }
 
-        .container {
-            margin-top: 50px;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Form Container - Parchment Style */
+    .form-container {
+        background: var(--bg-card);
+        border: 3px solid var(--border-color);
+        border-radius: 8px;
+        padding: 50px 40px;
+        box-shadow: 0 0 40px var(--shadow-color);
+        position: relative;
+    }
+
+    .form-container::before {
+        content: '⚔️';
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 2.5rem;
+        background: var(--bg-card);
+        padding: 0 20px;
+    }
+
+    .form-container::after {
+        content: '◆';
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        opacity: 0.3;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 40px;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 20px;
+    }
+
+    .form-header h1 {
+        font-family: 'Uncial Antiqua', cursive;
+        color: var(--text-primary);
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        text-shadow: 0 0 10px var(--shadow-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .form-header h1 i {
+        font-size: 2rem;
+        color: #ff4500;
+        animation: glow 2s ease-in-out infinite;
+    }
+
+    [data-theme="summer"] .form-header h1 i {
+        color: #dc143c;
+    }
+
+    @keyframes glow {
+
+        0%,
+        100% {
+            text-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
         }
 
-        .alert {
-            font-weight: bold;
+        50% {
+            text-shadow: 0 0 20px rgba(255, 69, 0, 0.8);
         }
+    }
 
+    .form-header p {
+        font-family: 'MedievalSharp', cursive;
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+    }
+
+    /* Current Image Display */
+    .current-image {
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .current-image label {
+        display: block;
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .current-image img {
+        max-width: 100%;
+        max-height: 300px;
+        border: 3px solid var(--border-secondary);
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    form p {
+        margin-bottom: 25px;
+    }
+
+    label {
+        display: block;
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    input[type="file"] {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid var(--border-secondary);
+        border-radius: 4px;
+        background: var(--input-bg);
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-family: 'Cinzel', serif;
+        transition: all 0.3s ease;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.6;
+    }
+
+    input:focus,
+    textarea:focus {
+        outline: none;
+        border-color: var(--border-color);
+        box-shadow: 0 0 15px var(--shadow-color);
+    }
+
+    textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Image Preview */
+    .image-preview-container {
+        margin: 15px 0;
+        display: none;
+    }
+
+    .image-preview-container.active {
+        display: block;
+    }
+
+    .image-preview {
+        width: 100%;
+        max-height: 250px;
+        border: 2px solid var(--border-secondary);
+        border-radius: 8px;
+        object-fit: cover;
+        margin-top: 10px;
+    }
+
+    .image-info {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 5px;
+        text-align: center;
+    }
+
+    /* Button Container */
+    .button-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 35px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 16px;
+        border: 2px solid;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+        font-family: 'Cinzel', serif;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #d4af37 0%, #aa8a2e 100%);
+        color: #1a1410;
+        border-color: var(--border-color);
+        box-shadow: 0 6px 20px var(--shadow-color);
+    }
+
+    .btn-save::before {
+        content: '✨';
+        position: absolute;
+        left: -30px;
+        transition: left 0.3s ease;
+    }
+
+    .btn-save:hover::before {
+        left: 10px;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px var(--shadow-color);
+        background: linear-gradient(135deg, #f0c040 0%, #d4af37 100%);
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #4682b4 0%, #1e3a5f 100%);
+        color: #ffffff;
+        border-color: #4682b4;
+        box-shadow: 0 4px 15px rgba(70, 130, 180, 0.4);
+    }
+
+    .btn-back::before {
+        content: '❄️';
+        position: absolute;
+        right: -30px;
+        transition: right 0.3s ease;
+    }
+
+    .btn-back:hover::before {
+        right: 10px;
+    }
+
+    .btn-back:hover {
+        background: linear-gradient(135deg, #5a9fd4 0%, #4682b4 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(70, 130, 180, 0.6);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
         .form-container {
-            padding: 30px;
-            border-radius: 8px;
-            background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 40px 30px;
         }
 
-        .form-container h4 {
-            margin-bottom: 20px;
+        .form-header h1 {
+            font-size: 2rem;
         }
 
-        .form-container .btn {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
+        .button-group {
+            flex-direction: column;
         }
+    }
+</style>
+{% endblock %}
 
-        .btn-success {
-            background-color: #28a745;
-            color: white;
-            font-weight: bold;
-        }
-
-        .btn-info {
-            background-color: #17a2b8;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            text-decoration: none;
-        }
-
-        .btn-info:hover {
-            background-color: #138496;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-8 offset-2">
-                <div class="form-container">
-                    <h4 class="alert alert-info">Update Student Information</h4>
-                    <form action="" method="post">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <input type="submit" class="btn btn-success" value="Update">
-                        <a href="{% url 'home' %}" class="btn btn-info">Back to Home</a>
-                    </form>
-                </div>
-            </div>
+{% block content %}
+<div class="div-container">
+    <div class="form-container">
+        <div class="form-header">
+            <h1><i class="fas fa-scroll"></i> Modify Treasure</h1>
+            <p>⚜ Alter the details of this item ⚜</p>
         </div>
+
+        <!-- Display current image if exists -->
+        {% if product.image %}
+        <div class="current-image">
+            <label>Current Image</label>
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        </div>
+        {% endif %}
+
+        <form action="" method="post" enctype="multipart/form-data" id="updateForm">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <!-- Image Preview for new upload -->
+            <div class="image-preview-container" id="imagePreviewContainer">
+                <label>New Image Preview</label>
+                <img id="imagePreview" class="image-preview" alt="Image preview">
+                <div class="image-info" id="imageInfo"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn btn-save">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a href="{% url 'home' %}" class="btn btn-back">
+                    <i class="fas fa-arrow-left"></i> Return
+                </a>
+            </div>
+        </form>
     </div>
+</div>
+{% endblock %}
 
-    <!-- Bootstrap JS, Popper.js, and jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% block scripts %}
+<script>
+    // Image preview functionality
+    const fileInput = document.querySelector('input[type="file"]');
+    const imagePreview = document.getElementById('imagePreview');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imageInfo = document.getElementById('imageInfo');
 
-</body>
-</html>
+    if (fileInput) {
+        fileInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+
+            if (file) {
+                // Check if file is an image
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                        imagePreviewContainer.classList.add('active');
+
+                        // Display file info
+                        const sizeInKB = (file.size / 1024).toFixed(2);
+                        imageInfo.textContent = `${file.name} (${sizeInKB} KB)`;
+                    };
+
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Please select an image file');
+                    fileInput.value = '';
+                }
+            } else {
+                imagePreviewContainer.classList.remove('active');
+            }
+        });
+    }
+</script>
+{% endblock %}
